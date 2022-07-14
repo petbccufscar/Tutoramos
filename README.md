@@ -72,9 +72,19 @@ INSTALLED_APPS = [
     'Reuniao'
 ]
 ```
+## Requirements.txt
 
+Manter as dependências é importante!!
 
-## Modelando as entidades
+Para salvar:
+```bash
+pip freeze > requirements.txt
+```
+
+Para instalar a partir do arquivo:
+```bash
+pip install -r requirements.txt
+```
 
 ## Adicionando no painel de adm
 [Documentação](https://docs.djangoproject.com/en/4.0/ref/contrib/admin/)
@@ -101,4 +111,43 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+## Model Fields
+[Referência](https://docs.djangoproject.com/en/4.0/ref/models/fields/)
+- IntegerField
+- BooleanField
+- CharField
+- DateField
+- DateTimeField
+- DurationField
+- EmailField
+
 ## Relações
+```py
+models.TIPODERELACAO( MODELOASSOCIADO, on_delete=E_SE_DELETAR, related_name=FUNCAO_INVERSA)
+```
+
+### Tipos de campos de relações
+[Documentação](https://docs.djangoproject.com/en/4.0/topics/db/examples/)
+- ForeignKey - Usado para 1 - N
+- OneToOneField - Usado para 1 - 1
+- ManyToManyField - Usado para M - N
+
+### Tipos de deleções principais
+[Referência](https://ilovedjango.com/django/models-and-databases/foreign-keys-on_delete-option-in-django-models/)
+
+- CASCADE
+- PROTECT
+- RESTRICT
+- SET_NULL
+- SET_DEFAULT
+
+### Relação inversa
+```py
+a.reunioes_do_perfil.all()
+```
+
+## Modelando as entidades
+
+## Serializadores
+
+## Views
