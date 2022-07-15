@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from POT.models import POT
 from .models import Perfil
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -27,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.username = validated_data['username']
         user.email = validated_data['email']
         user.first_name = validated_data['name']
+        validated_data.pop('name')
         user.set_password(validated_data['password'])
 
         return user
@@ -35,6 +38,8 @@ class UserSerializer(serializers.ModelSerializer):
         if 'password' in validated_data:
             instance.set_password(validated_data['password'])
             validated_data.pop('password')
+        instance.first_name = validated_data['name']
+        validated_data.pop('name')
 
         return super().update(instance, validated_data)
 
@@ -45,16 +50,18 @@ class UnifiedProfileSerializer(serializers.ModelSerializer):
         fields = [
             'user',
             'cor_favorita',
+            'POT'
         ]
         
     user: User = UserSerializer(write_only=True)
+    POT = serializers.PrimaryKeyRelatedField(queryset=POT.objects.all())
     
     @transaction.atomic
     def create(self, validated_data):
         user_data = validated_data.pop('user')
 
         user = User.objects.create_user(
-            name=user_data['name'],
+            first_name=user_data['name'],
             username=user_data['username'],
             email=user_data['email'],
             password=user_data['password']

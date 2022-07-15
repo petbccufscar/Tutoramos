@@ -15,7 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+from Perfil.views import LCPerfil
+from POT.views import LCPOT
+from Reuniao.views import LCReuniao
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('perfis/', LCPerfil.as_view()),
+    path('reunioes/', LCReuniao.as_view()),
+    path('pots/', LCPOT.as_view())
+
 ]

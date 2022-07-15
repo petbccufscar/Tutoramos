@@ -179,6 +179,9 @@ class ReuniaoSerializer(ModelSerializer):
 ## SerializerMethodField
 [Documentação](https://www.django-rest-framework.org/api-guide/fields/#serializermethodfield)
 
+## PrimaryKeyRelatedField
+[Documentação](https://www.django-rest-framework.org/api-guide/serializers/#modelserializer)
+
 ## Criando os serializers
 Crie arquivos serializers.py nos apps.
 Faça seus serializers, para esse tutorial ModelSerializer é suficiente.
@@ -221,5 +224,39 @@ tiver usado o begin-transaction").
 - Refresh
 
 ## APIView
+[Documentação](https://www.django-rest-framework.org/api-guide/views/)
+Exemplo: 
+```py
+class ListUsers(APIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAdminUser]
+
+    def get(self, request, format=None):
+        """
+        Return a list of all users.
+        """
+        usernames = [user.username for user in User.objects.all()]
+        return Response(usernames)
+```
+
+### Generic views
+[Documentação](https://www.django-rest-framework.org/api-guide/generic-views/)
+
+- CreateAPIView
+- RetrieveAPIView
+- UpdateAPIView
+- DestroyAPIView
+- ListAPIView
 
 
+## Como testar as rotas???
+- DJANGO DEBUG
+- [Insomnia](https://insomnia.rest/download) Free
+- [Postman](https://www.postman.com/) Pago
+- [...](https://www.google.com/search?channel=fs&client=ubuntu&q=postman+alternatives)
+
+## CRUD POT, REUNIÃO, PERFIL
+
+
+## Autenticação
+- Rotas de login 
