@@ -88,7 +88,9 @@ pip install -r requirements.txt
 
 ## Adicionando no painel de adm
 [Documentação](https://docs.djangoproject.com/en/4.0/ref/contrib/admin/)
+
 Para aparecer no painel de adm basta registrar o modelo no arquivo admin.py
+
 Exemplo:
 ```py
 from .models import Reuniao
@@ -147,7 +149,77 @@ a.reunioes_do_perfil.all()
 ```
 
 ## Modelando as entidades
+Exemplo:
+```py
+class Reuniao(models.Model):
+    # Campos
+    nome = models.CharField(blank=False, null=False, max_length=255)
+    descricao = models.CharField(blank=False, null=False, max_length=400)
+    dataHora = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    # Relações
+    participantes = models.ManyToManyField(Perfil,related_name="reunioes_do_perfil") 
+    POT = models.ForeignKey(POT, models.CASCADE, related_name="reunioes_do_pot")
+```
 ## Serializadores
+[Documentação](https://www.django-rest-framework.org/api-guide/serializers/)
 
-## Views
+"Serializers allow complex data such as querysets and model instances to be converted to native Python datatypes that can then be easily rendered into JSON, XML or other content types. Serializers also provide deserialization, allowing parsed data to be converted back into complex types, after first validating the incoming data."
+
+## Model Serializer (CRUD pronto)
+Exemplo: 
+```py
+class ReuniaoSerializer(ModelSerializer):
+    class Meta:
+        model = Reuniao
+        fields = '__all__'
+```
+
+## SerializerMethodField
+[Documentação](https://www.django-rest-framework.org/api-guide/fields/#serializermethodfield)
+
+## Criando os serializers
+Crie arquivos serializers.py nos apps.
+Faça seus serializers, para esse tutorial ModelSerializer é suficiente.
+Para mais informações, consulte a documentação.
+
+### Serializers compostos
+
+É possivel inserir um serializer como campo de outro.
+Exemplo:
+```py
+user: User = UserSerializer(write_only=True)
+```
+
+### to_representation
+[Documentação](https://www.django-rest-framework.org/api-guide/relations/#custom-relational-fields)
+Você customiza o que quer ver pelo Serializer!!
+
+
+## @transaction.atomic
+
+Lembram que em algum momento a gente ficou preocupado com as
+condições de corrida que podiam acontecer ao fazer alguma
+leitura do banco de dados, manipular esse dado e escrever novamente
+no banco? Aparentemente os bancos de dados tem operadores
+pra garantir que isso não aconteça. São chamados "transactions".
+Basicamente, vc coloca um "begin-transaction" antes de começar
+a fazer leituras e escritas no banco de dados e "commita" as
+alterações quando todas as operações forem feitas. Se alguma falhar,
+todas são desfeitas. Esse comando garante também a atomicidade,
+não tem a chance de vc ler uma propriedade A e outra pessoa escrever
+em cima desse propriedade antes de você terminar sua operação (se vc
+tiver usado o begin-transaction").
+
+
+## Rotas
+- CRUD Reunião
+- CRUD POT
+- CRUD Perfil+Usuário
+- Login
+- Refresh
+
+## APIView
+
+
