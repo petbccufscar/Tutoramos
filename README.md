@@ -159,8 +159,8 @@ class Reuniao(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # Relações
-    participantes = models.ManyToManyField(Perfil,related_name="reunioes_do_perfil") 
-    POT = models.ForeignKey(POT, models.CASCADE, related_name="reunioes_do_pot")
+    #participantes = models.ManyToManyField(Perfil,related_name="reunioes_do_perfil") 
+    #POT = models.ForeignKey(POT, models.CASCADE, related_name="reunioes_do_pot")
 ```
 ## Serializadores
 [Documentação](https://www.django-rest-framework.org/api-guide/serializers/)
