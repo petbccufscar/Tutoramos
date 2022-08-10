@@ -19,6 +19,10 @@ from django.urls import path
 from POT.views import ListCreatePOT, RetrieveUpdateDeletePOT
 from Perfil.views import ListCreatePerfil, RetrieveUpdatePerfil
 from Reuniao.views import ListCreateReuniao, RetrieveUpdateDeleteReuniao
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +32,7 @@ urlpatterns = [
     path('Reuniao/<pk>/', RetrieveUpdateDeleteReuniao.as_view()),
     path('Perfil/', ListCreatePerfil.as_view()),
     path('Perfil/<pk>/', RetrieveUpdatePerfil.as_view()),
+
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

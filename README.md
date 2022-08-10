@@ -384,3 +384,71 @@ Também é importante notar o uso do ".save()", você pode recuperar um objeto e
 
 ## Autenticação
 - Rotas de login 
+
+Adicione o seguinte no urls
+```py
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+urlpatterns = [
+    ...
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    ...
+]
+
+```
+
+[É possivel modificar as configurações do simple jwt](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html)
+
+[É possível modificar as rotas de login e refresh também!](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/customizing_token_claims.html)
+
+
+### Permissões
+[Com as Permissões podemos controlar o acesso as views!!](https://www.django-rest-framework.org/api-guide/permissions/#allowany)
+
+As principais são:
+- AllowAny
+- IsAuthenticated 
+- IsAdminUser
+
+Para ativa-las basta usar o campo permission_classes das views, as passando na lista.
+
+exemplo:
+
+```py
+class ListCreateReuniao(generics.ListCreateAPIView):
+    queryset = Reuniao.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReuniaoSerializer
+```
+
+Além de permitir o acesso, também podemos pegar o objeto do usuário logado nas views.
+
+exemplo:
+
+```py
+class ListCreateReuniao(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ReuniaoSerializer
+
+    def get_queryset(self):
+        qs = Reuniao.objects.all()
+        return qs.filter(POT=self.request.user.perfil.POT)
+```
+
+
+Limitando o queryset pelo método:
+```py
+class RetrieveUpdatePerfil(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PerfilSerializer
+
+    def get_queryset(self):
+        qs = Perfil.objects.all()
+        if self.request.method == 'GET':
+            return qs
+        return qs.filter(id=self.request.user.perfil.id)
+```
