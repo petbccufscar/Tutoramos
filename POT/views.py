@@ -1,11 +1,15 @@
-from django.shortcuts import render
-from .models import POT
-from rest_framework.generics import ListCreateAPIView
-from .serializers import POTSerializer
+from rest_framework import generics
 
+from POT.models import POT
+from POT.serializers import POTSerializer
 # Create your views here.
-# List Create
-class LCPOT(ListCreateAPIView):
+
+class ListCreatePOT(generics.ListCreateAPIView):
     queryset = POT.objects.all()
     serializer_class = POTSerializer
     permission_classes = []
+
+class RetrieveUpdateDeletePOT(generics.RetrieveUpdateDestroyAPIView):
+    queryset = POT.objects.all()
+    permission_classes = []
+    serializer_class = POTSerializer

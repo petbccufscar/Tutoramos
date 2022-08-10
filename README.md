@@ -257,6 +257,130 @@ class ListUsers(APIView):
 
 ## CRUD POT, REUNIÃO, PERFIL
 
+Os Cruds, em sua maioria serão feitos desse modo:
+Considerando um modelo NOME:
+```py
+class ListCreateNOME(generics.ListCreateAPIView):
+    queryset = NOME.objects.all()
+    permission_classes = []
+    serializer_class = NOMESerializer
+
+class RetrieveUpdateDeleteNOME(generics.RetrieveUpdateDestroyAPIView):
+    queryset = NOME.objects.all()
+    permission_classes = []
+    serializer_class = NOMESerializer
+```
+Esse é um CRUD bem simples que se aproveita dos generics para funcionar.
+Sempre é possível fazer modificações.
+Necessário dizer que é preciso linkar essas views no urls:
+```py
+path('NOME/', ListCreateNOME.as_view()),
+path('NOME/<pk>/', RetrieveUpdateDeleteNOME.as_view()),
+# <pk> é um kwarg que é necessário em views que são relativas a um unico objeto.
+# ele vai representar a chave primária desse objeto.
+# se acessar NOME/1/, você estará fazendo a operação no objeto nome de chave primária 1.
+```
+
+Em relação ao CRUD do Perfil + User é um pouco mais complicado,
+pois, como eles são integrados, temos os seguintes serializers:
+
+```py
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    username = serializers.CharField()
+    name = serializers.CharField()
+
+    def create(self, validated_data):
+        user = User()
+
+        user.username = validated_data['username']
+        user.email = validated_data['email']
+        user.first_name = validated_data['first_name']
+        validated_data.pop('name')
+        user.set_password(validated_data['password'])
+
+        return user
+
+    def update(self, user: User, validated_data):
+        l = ['username', 'email', 'first_name']
+        for i in l:
+            if i in validated_data:
+                setattr(user, i, validated_data[i])
+
+        if 'name' in validated_data:
+            validated_data.pop('name')
+
+        if 'password' in validated_data:
+            user.set_password(validated_data['password'])
+        
+        return user
+
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'password', 'username']
+
+
+class PerfilSerializer(serializers.ModelSerializer):
+
+    user: User = UserSerializer(write_only=True)
+    
+    class Meta:
+        model = Perfil
+        fields = '__all__'
+
+    @transaction.atomic
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+
+        user = User.objects.create_user(
+            first_name=user_data['name'],
+            username=user_data['username'],
+            email=user_data['email'],
+            password=user_data['password']
+        )
+
+        return Perfil.objects.create(**validated_data, user=user)
+
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        if 'user' in validated_data:
+            user_data = validated_data.pop('user')
+            d = {}
+
+            if 'name' in user_data:
+                d['first_name'] = user_data['name']
+
+            l = ['email', 'password', 'username']
+            for i in l:
+                if i in user_data:
+                    d[i] = user_data[i]
+            
+            serializer = UserSerializer()
+            user = serializer.update(user = instance.user,validated_data=d)
+            user.save()
+            instance.user = user
+        return super().update(instance,validated_data=validated_data)
+
+    
+
+
+    def to_representation(self, instance: Perfil):
+        representation = {'id': instance.user.id,
+                          'username': instance.user.username,
+                          'email': instance.user.email,
+                          'nome': instance.user.get_full_name()
+                          }
+
+        # Adiciona os dados da própria instância.
+        representation.update(super().to_representation(instance))
+        return representation
+```
+
+Note que há uma preocupação se os parâmetros foram passados no update, pois o verbo PATCH passa apenas os que serão atualizados.
+Também é importante notar o uso do ".save()", você pode recuperar um objeto e modificar, mas para a aplicação refletir no banco de dados é necessário fazer o save.
+
 
 ## Autenticação
 - Rotas de login 

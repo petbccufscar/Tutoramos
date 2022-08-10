@@ -15,18 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
-from Perfil.views import LCPerfil
-from POT.views import LCPOT
-from Reuniao.views import LCReuniao
+
+from POT.views import ListCreatePOT, RetrieveUpdateDeletePOT
+from Perfil.views import ListCreatePerfil, RetrieveUpdatePerfil
+from Reuniao.views import ListCreateReuniao, RetrieveUpdateDeleteReuniao
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('perfis/', LCPerfil.as_view()),
-    path('reunioes/', LCReuniao.as_view()),
-    path('pots/', LCPOT.as_view())
-
+    path('POT/', ListCreatePOT.as_view()),
+    path('POT/<pk>/', RetrieveUpdateDeletePOT.as_view()),
+    path('Reuniao/', ListCreateReuniao.as_view()),
+    path('Reuniao/<pk>/', RetrieveUpdateDeleteReuniao.as_view()),
+    path('Perfil/', ListCreatePerfil.as_view()),
+    path('Perfil/<pk>/', RetrieveUpdatePerfil.as_view()),
 ]

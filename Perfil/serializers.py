@@ -1,61 +1,55 @@
+from csv import unregister_dialect
 from rest_framework import serializers
 
-from POT.models import POT
+from POT.serializers import POTSerializer
 from .models import Perfil
 from django.contrib.auth.models import User
 from django.db import transaction
 
 class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email', 'password', 'name']
-
-    password = serializers.CharField(
-        write_only=True,
-        min_length=2,
-        max_length=200,
-    )
-    name = serializers.CharField(
-        min_length=2,
-        max_length=200,
-    )
-
-    id = serializers.IntegerField(read_only=True)
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    username = serializers.CharField()
+    name = serializers.CharField()
 
     def create(self, validated_data):
         user = User()
 
         user.username = validated_data['username']
         user.email = validated_data['email']
-        user.first_name = validated_data['name']
+        user.first_name = validated_data['first_name']
         validated_data.pop('name')
         user.set_password(validated_data['password'])
 
         return user
 
-    def update(self, instance, validated_data):
+    def update(self, user: User, validated_data):
+        l = ['username', 'email', 'first_name']
+        for i in l:
+            if i in validated_data:
+                setattr(user, i, validated_data[i])
+
+        if 'name' in validated_data:
+            validated_data.pop('name')
+
         if 'password' in validated_data:
-            instance.set_password(validated_data['password'])
-            validated_data.pop('password')
-        instance.first_name = validated_data['name']
-        validated_data.pop('name')
+            user.set_password(validated_data['password'])
+        
+        return user
 
-        return super().update(instance, validated_data)
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'password', 'username']
 
 
-class UnifiedProfileSerializer(serializers.ModelSerializer):
+class PerfilSerializer(serializers.ModelSerializer):
+
+    user: User = UserSerializer(write_only=True)
+    
     class Meta:
         model = Perfil
-        fields = [
-            'user',
-            'cor_favorita',
-            'POT'
-        ]
-        
-    user: User = UserSerializer(write_only=True)
-    POT = serializers.PrimaryKeyRelatedField(queryset=POT.objects.all())
-    
+        fields = '__all__'
+
     @transaction.atomic
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -69,20 +63,31 @@ class UnifiedProfileSerializer(serializers.ModelSerializer):
 
         return Perfil.objects.create(**validated_data, user=user)
 
+
     @transaction.atomic
-    def update(self, validated_data):
-        user_data = validated_data.pop('user')
+    def update(self, instance, validated_data):
+        if 'user' in validated_data:
+            user_data = validated_data.pop('user')
+            d = {}
 
-        user = User.objects.update(
-            name=user_data['name'],
-            username=user_data['username'],
-            email=user_data['email'],
-            password=user_data['password']
-        )
+            if 'name' in user_data:
+                d['first_name'] = user_data['name']
 
-        return Perfil.objects.update(**validated_data, user=user)
+            l = ['email', 'password', 'username']
+            for i in l:
+                if i in user_data:
+                    d[i] = user_data[i]
+            
+            serializer = UserSerializer()
+            user = serializer.update(user = instance.user,validated_data=d)
+            user.save()
+            instance.user = user
+        return super().update(instance,validated_data=validated_data)
 
-    def to_representation(self, instance):
+    
+
+
+    def to_representation(self, instance: Perfil):
         representation = {'id': instance.user.id,
                           'username': instance.user.username,
                           'email': instance.user.email,

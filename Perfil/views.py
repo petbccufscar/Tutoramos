@@ -1,12 +1,17 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.generics import ListCreateAPIView
-from .models import Perfil
-from .serializers import UnifiedProfileSerializer
-# Create your views here.
+from rest_framework import generics
 
-# List Create
-class LCPerfil(ListCreateAPIView):
+from Perfil.models import Perfil
+from Perfil.serializers import PerfilSerializer
+
+# Create your views here.
+class ListCreatePerfil(generics.ListCreateAPIView):
     queryset = Perfil.objects.all()
-    serializer_class = UnifiedProfileSerializer
     permission_classes = []
+    serializer_class = PerfilSerializer
+
+class RetrieveUpdatePerfil(generics.RetrieveUpdateAPIView):
+    queryset = Perfil.objects.all()
+    permission_classes = []
+    serializer_class = PerfilSerializer
+

@@ -1,11 +1,15 @@
-from django.shortcuts import render
-from rest_framework.generics import ListCreateAPIView
-from .models import Reuniao
-from .serializers import ReuniaoSerializer
-# Create your views here.
+from rest_framework import generics
 
-# List Create
-class LCReuniao(ListCreateAPIView):
+from Reuniao.models import Reuniao
+from Reuniao.serializers import ReuniaoSerializer
+
+# Create your views here.
+class ListCreateReuniao(generics.ListCreateAPIView):
     queryset = Reuniao.objects.all()
-    serializer_class = ReuniaoSerializer
     permission_classes = []
+    serializer_class = ReuniaoSerializer
+
+class RetrieveUpdateDeleteReuniao(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Reuniao.objects.all()
+    permission_classes = []
+    serializer_class = ReuniaoSerializer

@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-from .models import POT
 # Register your models here.
+from .models import POT
 admin.site.register(POT)
